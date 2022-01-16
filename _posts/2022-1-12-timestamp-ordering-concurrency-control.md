@@ -17,7 +17,7 @@ tags: Database 15-445
 
 
 
-<img src="../assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115155901834.png" alt="image-20220115155901834" style="zoom:50%;" />
+![image-20220115155901834]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115155901834.png' | relative_url}})
 
 ## 1. Rules of Timestamp Ordering
 
@@ -33,7 +33,7 @@ T/O其实思想很简单：按txn进场顺序分配timestamp，然后保证txn�
 >
 > Use timestamps to determine the serializability order of txns. If $TS(t_i) < TS(t_j)$, then the DBMS must ensure that the execution schedule is equivalent to a serial schedule where $T_i$ appears before $T_j$.
 
-<img src="../assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20211228132151727.png" alt="image-20211228132151727" style="zoom:80%;" />
+![image-20211228132151727]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20211228132151727.png' | relative_url}})
 
 每个txn开始时，会被分配一个timestamp，记作$TS(t_i)$. 这个txn的timestamp干嘛用的呢？它和要读写的resource有关联。
 
@@ -45,7 +45,7 @@ T/O其实思想很简单：按txn进场顺序分配timestamp，然后保证txn�
 
 下面来举两个例子：
 
-<img src="../assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115163935694.png" alt="image-20220115163935694" style="zoom:60%;" />
+![image-20220115163935694]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115163935694.png' | relative_url}})
 
 先看左图，T1先开始，T2后开始，所以分别分到timestamp 1和2。按照时间顺序，T1读B，未违反规则，B的R-TS更新为1；T2读B，未违反规则，B的R-TS的更新为2；T2写B，未违反规则，B的W-TS的更新为2；T1读A，未违反规则，A的R-TS的更新为1；T2读A，未违反规则，B的W-TS的更新为2；T1再读A，未违反规则，A的R-TS的保持为2；T2写A，未违反规则，A的W-TS的更新为2.
 
@@ -57,7 +57,7 @@ T/O其实思想很简单：按txn进场顺序分配timestamp，然后保证txn�
 
 ### 1.2 Thomas Write Rule
 
-<img src="../assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115165543602.png" alt="image-20220115165543602" style="zoom:80%;" />
+![image-20220115165543602]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115165543602.png' | relative_url}})
 
 还有另一种写规则叫做**Thomas Write Rule**，这里简单介绍一下。简单来说，在普通写规则的基础上，Thomas Write Rule对于要去写一个未来写过的资源这种情况，直接skip（本来是要abort的）。通过上图右边的例子就能直观地理解这个规则了。
 
@@ -87,7 +87,7 @@ T/O其实思想很简单：按txn进场顺序分配timestamp，然后保证txn�
 >
 > A schedule is recoverable if txns commit only after <u>all txns</u> whose changes they read, <u>commit</u>.
 
-<img src="../assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115170136786.png" alt="image-20220115170136786" style="zoom:50%;" />
+![image-20220115170136786]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115170136786.png' | relative_url}})
 
 
 
@@ -95,7 +95,7 @@ T/O其实思想很简单：按txn进场顺序分配timestamp，然后保证txn�
 
 Serializability可以允许我们解决并发问题，但强制执行它可能会parallelism降低而并限制性能。所以我们引入Isolation Level，使用weaker level of consistency 去 improve scalability.
 
-> ![image-20220115173019814](../assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115173019814.png)
+> ![image-20220115173019814]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115173019814.png' | relative_url}})
 
 大部分数据库默认的隔离等级事read committed. MySQL默认repeatable read.
 

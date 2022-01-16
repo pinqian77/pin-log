@@ -6,8 +6,6 @@ date: 2022-1-12 02:00:00
 tags: Database 15-445
 ---
 
-<img src="../assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115155901834.png" alt="image-20220115155901834" style="zoom:50%;" />
-
 > 上节课介绍了Two-Phase Locking Concurrency Control，这是一种用lock机制来实现的并发控制方法。这篇笔记主要记录Timestamp Ordering Concurrency Control，它完全基于timestamp实现，不用lock. 通过这节课可以明白：
 >
 > - Timestamp是在何时分发，分发给谁，如何分发
@@ -19,7 +17,7 @@ tags: Database 15-445
 
 
 
-
+<img src="../assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115155901834.png" alt="image-20220115155901834" style="zoom:50%;" />
 
 ## 1. Rules of Timestamp Ordering
 

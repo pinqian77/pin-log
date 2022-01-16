@@ -6,8 +6,6 @@ date: 2022-1-13 02:00:00
 tags: Database 15-445
 ---
 
-<img src="../assets/images/2022-1-13-multi-version-concurrency-control/image-20220115175023145.png" alt="image-20220115175023145" style="zoom:67%;" />
-
 > 之前把解决并发控制的协议介绍了，这篇笔记主要记录Multi-Version Concurrency Control，它不是一个协议，而是更为具体的并发控制实现。（这篇有坑待填）
 
 <!--more-->
@@ -15,6 +13,8 @@ tags: Database 15-445
 
 
 ## 1. Overview of MVCC
+
+<img src="../assets/images/2022-1-13-multi-version-concurrency-control/image-20220115175023145.png" alt="image-20220115175023145" style="zoom:67%;" />
 
 MVCC的Main Idea是：Writers don’t block the readers. Readers don’t block the writers. 具体来说，当一个txn在对一个object进行写操作时，DBMS会对这个object创建一个新的版本；当txn读一个object时，读的是它最新的版本。它的好处在于，第一，它使得read-only的txn可以在不使用任何lock的情况下，读取consistent snapshot（Use timestamps to determine visibility）；第二，它支持time-travel queries，使得能检索不同时间点的数据库状态。
 

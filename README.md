@@ -1,2 +1,2 @@
-# Lil'Log
-Lilian's Blog
+# Pin'Log
+Pin's Blog

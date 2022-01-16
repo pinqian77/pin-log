@@ -33,7 +33,6 @@ tags: Database 15-445
 
 其次，我们需要知道 **Transaction** 是什么。
 
-> **Definition of Transaction**
 >
 > A transaction(txn) is the execution of <u>a sequence of one or more operations</u> on a database to perform some higher-level function. It is the <u>basic unit of change</u> in a DBMS.
 >
@@ -57,8 +56,7 @@ tags: Database 15-445
 
 并发意味着不同的transaction中的operation会交错地被执行，这意味着可能会出错，所以我们需要规定合理的criteria去判断并发的合法性，这个criteria便是**ACID**.
 
-> **Definition of ACID (Correctness Criteria)** 
->
+
 > **Atomicity**: all actions in the txn happen, or none happen.
 >
 > **Consistency**: if each txn is consistent and the DB starts consistent, then it ends up consistent.

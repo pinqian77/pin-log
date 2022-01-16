@@ -96,7 +96,7 @@ DBMS包含一个**Lock Manager**，用于决定txn是否可以锁定。 主体�
 
 对于**deadlock prevention**，我们有wait-die和wound-wait两个预防方法。这两种方法里，各个txn都会根据启动的时间被赋予priority，priority高，就代表这个txn启动得早。那怎么来理解这两种方法呢？首先，我们要明确，这两个语句的主语其实都是针对要申请Lock的txn；然后，前一个单词表示的是主语priority高的时候要做的事情，后一个单词表示主语priority低的时候要做的事情，下面来举个例子：
 
-![image-20220115152351331](../assets/image/2022-1-11-two-phase-locking-concurrency-control/image-20220115152351331.png)
+![image-20220115152351331]({{'/assets/image/2022-1-11-two-phase-locking-concurrency-control/image-20220115152351331.png' | relative_url}})
 
 上面这个，T1要申请锁，所以主语是T1，且我们知道T1先开始，所以T1优先级高。这时候满足“主语优先级高”的情况，所以我们看第一个单词。那么如果是Wait-Die，那么T1 waits T2，T1得等T2释放A了才能用A；如果是Wound-Wait，那么T1 wounds T2，T1伤害了T2，T2直接被abort，A被T1从T2那里抢了过来。
 

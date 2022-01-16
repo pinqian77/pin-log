@@ -126,11 +126,9 @@ DBMS包含一个**Lock Manager**，用于决定txn是否可以锁定。 主体�
 
 总结一下，如果我们要在一个node上设置S或者IS，那么这个node的parent node至少必须被设置了IS；如果要在一个node上设置X，IX，或者SIX，那么这个node的parent node至少必须被设置了IX.
 
-![image-20211227211109853]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20211227211109853-16423631666222.png' | relative_url}})
-
-
+![image-20211227211109853]({{'//assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20211227211109853.png' | relative_url}})
 
 那么至此，我们的schedule分类进一步拓展。其实可以把No cascading aborts这一类单独看，毕竟strong strict 2PL设计出来就是为了避免cascading aborts，它比conflict serializable严格，比serial弱，这样就比较好记忆了。
 
-![image-20211227200617795]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20211227200617795-16423631465761.png' | relative_url}})
+![image-20211227200617795]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20211227200617795.png' | relative_url}})
 

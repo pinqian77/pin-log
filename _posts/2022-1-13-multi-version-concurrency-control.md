@@ -14,7 +14,7 @@ tags: Database 15-445
 
 ## 1. Overview of MVCC
 
-<img src="../assets/images/2022-1-13-multi-version-concurrency-control/image-20220115175023145.png" alt="image-20220115175023145" style="zoom:67%;" />
+![image-20220115175023145]({{'//assets/images/2022-1-13-multi-version-concurrency-control/image-20220115175023145.png' | relative_url}})
 
 MVCC的Main Idea是：Writers don’t block the readers. Readers don’t block the writers. 具体来说，当一个txn在对一个object进行写操作时，DBMS会对这个object创建一个新的版本；当txn读一个object时，读的是它最新的版本。它的好处在于，第一，它使得read-only的txn可以在不使用任何lock的情况下，读取consistent snapshot（Use timestamps to determine visibility）；第二，它支持time-travel queries，使得能检索不同时间点的数据库状态。
 
@@ -29,7 +29,7 @@ MVCC的设计由四个方面组成：
 
 先来举个例子直观理解一下：
 
-<img src="../assets/images/2022-1-13-multi-version-concurrency-control/image-20220115180217516.png" alt="image-20220115180217516" style="zoom:80%;" />
+![image-20220115180217516]({{'//assets/images/2022-1-13-multi-version-concurrency-control/image-20220115180217516.png' | relative_url}})
 
 我们根据开始时间给txn分好timestamp后，开始执行。
 
@@ -37,13 +37,13 @@ MVCC的设计由四个方面组成：
 
 2. T1对A进行写操作，创建新版本，Begin timestamp设置为1，旧版本End timestamp设置为1；
 
-<img src="../assets/images/2022-1-13-multi-version-concurrency-control/image-20220115180241759.png" alt="image-20220115180241759" style="zoom:80%;" />
+![image-20220115180241759]({{'//assets/images/2022-1-13-multi-version-concurrency-control/image-20220115180241759.png' | relative_url}})
 
 3. T2要读A，查Status Table可知，T1写操作产生的A1没有被commit，所以T2只能读取版本A0，Status Table中T2标记为Active；
 
 4. T2要写A，但必须等会儿再写，因为T1还没有Commit，
 
-<img src="../assets/images/2022-1-13-multi-version-concurrency-control/image-20220115180356385.png" alt="image-20220115180356385" style="zoom:80%;" />
+![image-20220115180356385]({{'//assets/images/2022-1-13-multi-version-concurrency-control/image-20220115180356385.png' | relative_url}})
 
 5. T1 要读A，这次读的是从它开始之后的最新版本，所以是读A1；
 6. T1 Commit，更新Status Table中T1为Committed；

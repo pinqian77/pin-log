@@ -1,8 +1,8 @@
 title: Pin'Log
 name: "Pin's Blog"
 author: Pin Qian
-twitter_username: lilianweng
-baseurl: "https://pinqian77.github.io/"
+twitter_username: qian_pin
+baseurl: "/pin-log"
 description: Document my learning notes.
 profile_url: "https://pinqian77.github.io/"
 

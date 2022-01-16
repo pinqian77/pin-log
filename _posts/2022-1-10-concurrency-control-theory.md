@@ -97,19 +97,19 @@ tags: Database 15-445
 
 - read-write conflict 对应 unrepeatable reads.
 
-![image-20211226222332279](/../../../../../media/2022-1-10-concurrency-control-theory/image-20211226222332279.png)
+![image-20211226222332279]({{ '/assets/images/2022-1-10-concurrency-control-theory/image-20211226222332279.png' | relative_url }})
 
 
 
 - write-read conflict 对应 reading uncommitted data ("dirty read").
 
-![image-20211226222455660](/../../../../../media/2022-1-10-concurrency-control-theory/image-20211226222455660.png)
+![image-20211226222455660]({{ '/assets/images/2022-1-10-concurrency-control-theory/image-20211226222455660.png' | relative_url }})
 
 
 
 - write-write 对应 overwriting uncommitted data.
 
-![image-20211226222542349](/../../../../../media/2022-1-10-concurrency-control-theory/image-20211226222542349.png)
+![image-20211226222542349]({{ '/assets/images/2022-1-10-concurrency-control-theory/image-20211226222542349.png' | relative_url"}})
 
 
 
@@ -140,4 +140,4 @@ tags: Database 15-445
 
 那么最后，这一节最重要的几个概念可以由这张图来概括。
 
-![image-20211226224957811](/../../../../../media/2022-1-10-concurrency-control-theory/image-20211226224957811.png)
+![image-20211226224957811]({{ '/assets/images/2022-1-10-concurrency-control-theory/image-20211226224957811.png' | relative_url"}})

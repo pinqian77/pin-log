@@ -1,10 +1,10 @@
 title: Pin'Log
-name: "Lilian's Tech Blog"
-author: Lilian Weng
+name: "Pin's Blog"
+author: Pin Qian
 twitter_username: lilianweng
-baseurl: "/lil-log"
+baseurl: "https://pinqian77.github.io/"
 description: Document my learning notes.
-profile_url: "http://lilianweng.github.io"
+profile_url: "https://pinqian77.github.io/"
 
 # Build settings
 markdown: kramdown

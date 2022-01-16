@@ -10,9 +10,8 @@ tags: Database 15-445
 >
 > - Two-Phase Locking是什么
 > - Rigorous Two-Phase Locking是什么，为什么需要rigorous
-> - 如何用wait-for做deadlock detection
-> - 为什么要有Intention lock
-> - Intention lock怎么用
+> - 如何handle deadlock
+> - 为什么要有， 怎么用Intention lock
 
 <!--more-->
 

@@ -4,6 +4,7 @@ comments: true
 title: "Database System: Concurrency Control Theory"
 date: 2022-1-10 02:00:00
 tags: Database 15-445
+typora-root-url: "C:\qp_box\_BolgField\pin-log"
 ---
 
 
@@ -97,19 +98,19 @@ tags: Database 15-445
 
 - read-write conflict 对应 unrepeatable reads.
 
-<img src="../assets/images/2022-1-10-concurrency-control-theory/image-20211226222332279.png" alt="image-20211226222332279" style="zoom:70%;" />
+![image-20211226222332279](/../../../../../media/2022-1-10-concurrency-control-theory/image-20211226222332279.png)
 
-![test]({{ site.url }}/assets/images/2022-1-10-concurrency-control-theory/image-20211226222332279.png)
 
-![Interpretable data representation]({{ '/assets/images/2022-1-10-concurrency-control-theory/image-20211226222332279.png' | relative_url }})
 
 - write-read conflict 对应 reading uncommitted data ("dirty read").
 
-<img src="../assets/images/2022-1-10-concurrency-control-theory/image-20211226222455660.png" alt="image-20211226222455660" style="zoom:70%;" />
+![image-20211226222455660](/../../../../../media/2022-1-10-concurrency-control-theory/image-20211226222455660.png)
+
+
 
 - write-write 对应 overwriting uncommitted data.
 
-<img src="../assets/images/2022-1-10-concurrency-control-theory/image-20211226222542349.png" alt="image-20211226222542349" style="zoom:70%;" />
+![image-20211226222542349](/../../../../../media/2022-1-10-concurrency-control-theory/image-20211226222542349.png)
 
 
 
@@ -140,5 +141,4 @@ tags: Database 15-445
 
 那么最后，这一节最重要的几个概念可以由这张图来概括。
 
-<img src="../assets/images/2022-1-10-concurrency-control-theory/image-20211226224957811.png" alt="image-20211226224957811" style="zoom:67%;" />
-
+![image-20211226224957811](/../../../../../media/2022-1-10-concurrency-control-theory/image-20211226224957811.png)

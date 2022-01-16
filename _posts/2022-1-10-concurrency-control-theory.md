@@ -4,7 +4,6 @@ comments: true
 title: "Database System: Concurrency Control Theory"
 date: 2022-1-10 02:00:00
 tags: Database 15-445
-typora-root-url: "C:\qp_box\_BolgField\pin-log"
 ---
 
 

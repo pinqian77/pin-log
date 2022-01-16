@@ -68,7 +68,7 @@ DBMS包含一个**Lock Manager**，用于决定txn是否可以锁定。 主体�
 
 那么它是怎么做的呢？顾名思义，它分为两个阶段：Phase 1为申请锁的阶段，Phase 2为释放锁的阶段。
 
-![image-20211227191643014]({{'/assets/image/2022-1-11-two-phase-locking-concurrency-control/image-20211227191643014.png' | relative_url}})
+![image-20211227191643014]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20211227191643014.png' | relative_url}})
 
 那么为什么这样可以确保schedule是conflict serializable的呢？我是这么理解的，这就像是做算法题时遇到的滑动窗口问题，有一个扩张到一定条件再收缩的过程。而这个过程的方向性是唯一的，就像从左往右去遍历一个数组，在这里便是遍历所有的operations。那么如果我们合理地用锁，执行是合法的，方向是单调的，就不可能在dependency graph中成环，不成环也就意味着conflict serializable.
 
@@ -82,7 +82,7 @@ DBMS包含一个**Lock Manager**，用于决定txn是否可以锁定。 主体�
 >
 > The txn is only allowed to release locks after is has ended, i.e., committed or aborted.
 
-![image-20211227195935984]({{'/assets/image/2022-1-11-two-phase-locking-concurrency-control/image-20211227195935984.png' | relative_url}})
+![image-20211227195935984]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20211227195935984.png' | relative_url}})
 
 
 
@@ -92,11 +92,11 @@ DBMS包含一个**Lock Manager**，用于决定txn是否可以锁定。 主体�
 
 对于**deadlock detection**，我们**periodical地用waits-for graph**去检测，如果成环则发生了死锁。如果锁上了，一个victim txn会被选中abort掉，使得僵局缓解，DBMS来决定roll back多远。
 
-![image-20220115151556221]({{'/assets/image/2022-1-11-two-phase-locking-concurrency-control/image-20220115151556221.png' | relative_url}})
+![image-20220115151556221]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20220115151556221.png' | relative_url}})
 
 对于**deadlock prevention**，我们有wait-die和wound-wait两个预防方法。这两种方法里，各个txn都会根据启动的时间被赋予priority，priority高，就代表这个txn启动得早。那怎么来理解这两种方法呢？首先，我们要明确，这两个语句的主语其实都是针对要申请Lock的txn；然后，前一个单词表示的是主语priority高的时候要做的事情，后一个单词表示主语priority低的时候要做的事情，下面来举个例子：
 
-![image-20220115152351331]({{'/assets/image/2022-1-11-two-phase-locking-concurrency-control/image-20220115152351331.png' | relative_url}})
+![image-20220115152351331]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20220115152351331.png' | relative_url}})
 
 上面这个，T1要申请锁，所以主语是T1，且我们知道T1先开始，所以T1优先级高。这时候满足“主语优先级高”的情况，所以我们看第一个单词。那么如果是Wait-Die，那么T1 waits T2，T1得等T2释放A了才能用A；如果是Wound-Wait，那么T1 wounds T2，T1伤害了T2，T2直接被abort，A被T1从T2那里抢了过来。
 
@@ -126,11 +126,11 @@ DBMS包含一个**Lock Manager**，用于决定txn是否可以锁定。 主体�
 
 总结一下，如果我们要在一个node上设置S或者IS，那么这个node的parent node至少必须被设置了IS；如果要在一个node上设置X，IX，或者SIX，那么这个node的parent node至少必须被设置了IX.
 
-![image-20211227211109853]({{'/assets/image/2022-1-11-two-phase-locking-concurrency-control/image-20211227211109853-16423631666222.png' | relative_url}})
+![image-20211227211109853]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20211227211109853-16423631666222.png' | relative_url}})
 
 
 
 那么至此，我们的schedule分类进一步拓展。其实可以把No cascading aborts这一类单独看，毕竟strong strict 2PL设计出来就是为了避免cascading aborts，它比conflict serializable严格，比serial弱，这样就比较好记忆了。
 
-![image-20211227200617795]({{'/assets/image/2022-1-11-two-phase-locking-concurrency-control/image-20211227200617795-16423631465761.png' | relative_url}})
+![image-20211227200617795]({{'/assets/images/2022-1-11-two-phase-locking-concurrency-control/image-20211227200617795-16423631465761.png' | relative_url}})
 

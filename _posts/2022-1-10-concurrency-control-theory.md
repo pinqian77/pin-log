@@ -10,9 +10,8 @@ tags: Database 15-445
 
 > 这节课从一个high level的角度介绍了Concurrency Control 和 Recovery部分，具体实现方法会在下一节课中介绍。通过这节课我们可以了解：
 >
-> - Transaction是什么
-> - 为什么Concurrency Control and Recovery这么重要
-> - Schedule是什么
+> - Transaction，Schedule是什么
+> - 为什么需要Concurrency Control and Recovery
 > - ACID分别对应的情况
 > - Serial Schedule，Serializable Schedule，Conflict Serializable Schedule的关系是什么
 > - 如何判断Conflict Serializable Schedule
@@ -34,17 +33,15 @@ tags: Database 15-445
 
 其次，我们需要知道 **Transaction** 是什么。
 
-> **Definition of Transaction**
->
 > A transaction(txn) is the execution of <u>a sequence of one or more operations</u> on a database to perform some higher-level function. It is the <u>basic unit of change</u> in a DBMS.
 >
 > In SQL, txn
 >
 > - starts with <u>BEGIN</u> command.
-> - stops with either <u>COMMIT</u> or <u>ABORT</u>:
+>- stops with either <u>COMMIT</u> or <u>ABORT</u>:
 >   - if commit, the DBMS either saves all the changes or aborts it.
 >   - if abort, all changes are undone.
->
+> 
 
 
 
@@ -58,8 +55,6 @@ tags: Database 15-445
 
 并发意味着不同的transaction中的operation会交错地被执行，这意味着可能会出错，所以我们需要规定合理的criteria去判断并发的合法性，这个criteria便是**ACID**.
 
-> **Definition of ACID (Correctness Criteria)** 
->
 > **Atomicity**: all actions in the txn happen, or none happen.
 >
 > **Consistency**: if each txn is consistent and the DB starts consistent, then it ends up consistent.
@@ -67,8 +62,6 @@ tags: Database 15-445
 > **Isolation**: execution of one txn is isolated from that of other txns.
 >
 > **Durability**: if a txn commits, its effects persist.
-
- 
 
 我们后面讲到的方法，都是为了去实现 atomicity, isolation, durability，因为consistency其实算是一个desired criterion，在DBMS的掌控范围之外。 这里给一个high level的概述，我们主要通过logging和shadow paging实现atomicity和durability，通过concurrency control protocol实现isolation.
 
@@ -105,6 +98,10 @@ tags: Database 15-445
 - read-write conflict 对应 unrepeatable reads.
 
 <img src="../assets/images/2022-1-10-concurrency-control-theory/image-20211226222332279.png" alt="image-20211226222332279" style="zoom:70%;" />
+
+![test]({{ site.url }}/assets/images/2022-1-10-concurrency-control-theory/image-20211226222332279.png)
+
+![Interpretable data representation]({{ '/assets/images/2022-1-10-concurrency-control-theory/image-20211226222332279.png' | relative_url }})
 
 - write-read conflict 对应 reading uncommitted data ("dirty read").
 

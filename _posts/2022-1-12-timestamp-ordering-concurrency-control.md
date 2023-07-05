@@ -1,18 +1,15 @@
 ---
 layout: post
-comments: true
 title: "Database System: Timestamp Ordering Concurrency Control"
 date: 2022-1-12 02:00:00
-tags: Database 15-445
+tags: 15-445
 ---
 
-> 上节课介绍了Two-Phase Locking Concurrency Control，这是一种用lock机制来实现的并发控制方法。这篇笔记主要记录Timestamp Ordering Concurrency Control，它完全基于timestamp实现，不用lock. 通过这节课可以明白：
->
-> - Timestamp是在何时分发，分发给谁，如何分发
-> - Timestamp Ordering Concurrency Control 是什么
-> - strict T/O 不同在哪里
+> The previous lesson introduced Two-Phase Locking Concurrency Control, a method of concurrency control implemented using the lock mechanism. This note focuses on Timestamp Ordering Concurrency Control, which is based entirely on timestamps and does not use locks. In this lesson, you can understand:
+> - When Timestamp is distributed, to whom and how it is distributed
+> - What Timestamp Ordering Concurrency Control is
+> - What is the difference between strict T/O
 > - Isolation Level
-
 <!--more-->
 
 
@@ -23,11 +20,9 @@ tags: Database 15-445
 
 ### 1.1 Basic T/O
 
-首先我们来区分一下两种方法。要实现并发控制，我们的essential motivation其实就是想要保证来自不同txn中的conflicting operations能够被serial地执行。之前讲的Two-Phase Locking是一种pessimistic的方法，它边运行边决定serializability order，用到是工具是各种**lock**；而Timestamp Ordering（T/O）是一种optimistic的方法，serializability order在txn被执行之前决定，用到的工具是**timestamp**。注意，T/O是在execute前决定serializability order的。
+First let's distinguish between the two approaches. To achieve concurrency control, our essential motivation is actually to ensure that conflicting operations from different txn can be executed serially. Two-Phase Locking is a pessimistic approach, which determines the serializability order while running, using various tools **lock**, while Timestamp Ordering (T/O) is an optimistic approach, in which the serializability order is determined when the txn is executed. The serializability order is decided before txn is executed, and the tool used is **timestamp**. Note that T/O determines the serializability order before executing.
 
-
-
-T/O其实思想很简单：按txn进场顺序分配timestamp，然后保证txn按照timestamp由小到大执行，这样就保证了serial schedule.
+The idea of T/O is actually very simple: assign timestamps in the order of txn entry, and then ensure that txn is executed from smallest to largest according to the timestamp, so that the serial schedule is guaranteed.
 
 > **T/O Concurrency Control**
 >
@@ -35,23 +30,23 @@ T/O其实思想很简单：按txn进场顺序分配timestamp，然后保证txn�
 
 ![image-20211228132151727]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20211228132151727.png' | relative_url}})
 
-每个txn开始时，会被分配一个timestamp，记作$TS(t_i)$. 这个txn的timestamp干嘛用的呢？它和要读写的resource有关联。
+At the beginning of each txn, a timestamp is assigned as $TS(t_i)$. What is the purpose of this txn timestamp? It is associated with the resource to be read or written.
 
-数据库中的resource X会记录上一个成功读或者写它的txn的timestamp。那么这样，在每个operation执行之前我们就可以进行check：
+Resource X in the database will record the last txn timestamp that successfully read or wrote it, so that before each operation is executed we can check:
 
-对于读操作来说，如果一个resource已经被一个未来的txn写过了，那读的肯定就有问题，所以要abort；
+For a read operation, if a resource has already been written by a future txn, the read must be faulty, so abort;
 
-对于写来说，如果一个resource正在被未来的txn读，或者已经被未来的txn写了，那写的肯定就有问题，所以要abort.
+For writes, if a resource is being read by a future txn, or has already been written by a future txn, then the write must be faulty, so abort.
 
-下面来举两个例子：
+Here are two examples:
 
 ![image-20220115163935694]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115163935694.png' | relative_url}})
 
-先看左图，T1先开始，T2后开始，所以分别分到timestamp 1和2。按照时间顺序，T1读B，未违反规则，B的R-TS更新为1；T2读B，未违反规则，B的R-TS的更新为2；T2写B，未违反规则，B的W-TS的更新为2；T1读A，未违反规则，A的R-TS的更新为1；T2读A，未违反规则，B的W-TS的更新为2；T1再读A，未违反规则，A的R-TS的保持为2；T2写A，未违反规则，A的W-TS的更新为2.
+Let's first look at the figure on the left. T1 starts first, followed by T2, so they receive timestamps 1 and 2 respectively. In chronological order, T1 reads B, which doesn't violate any rules, and B's R-TS is updated to 1; T2 reads B, which also doesn't violate any rules, and B's R-TS is updated to 2; T2 writes to B, which again doesn't violate any rules, and B's W-TS is updated to 2; T1 reads A, which doesn't violate any rules, and A's R-TS is updated to 1; T2 reads A, which doesn't violate any rules, and A's W-TS is updated to 2; T1 reads A again, which doesn't violate any rules, and A's R-TS remains at 2; T2 writes to A, which doesn't violate any rules, and A's W-TS is updated to 2.
 
-再看右图，T1先开始，T2后开始，所以分别分到timestamp 1和2。按照时间顺序，T1读A，未违反规则，A的R-TS更新为1；T2写A，未违反规则，A的W-TS的更新为2；T1想写A，但此时$TS(t_1)=1$, $W-TS(A)=2$, 违反了规则，所以T1将被abort.
+Now, let's look at the figure on the right. T1 starts first, followed by T2, so they receive timestamps 1 and 2 respectively. In chronological order, T1 reads A, which doesn't violate any rules, and A's R-TS is updated to 1; T2 writes to A, which doesn't violate any rules, and A's W-TS is updated to 2; T1 wants to write to A, but at this time, $TS(t_1)=1$, and $W-TS(A)=2$, which violates the rules, so T1 will be aborted.
 
-这样的T/O协议保证schedule一定是conflict serializable的，且不会发生死锁，因为没txn在等，有错直接abort了。但是呢，要是一个txn非常长，它很有可能会面临starvation，因为慢慢长路，它被abort的可能性就很大。
+This type of Timestamp Ordering (T/O) protocol ensures that the schedule is always conflict serializable and no deadlock will occur because no transaction is waiting, any errors will lead to immediate abortion. However, there's a downside - if a transaction is very long, it may face starvation. As the transaction's length increases, the likelihood of it being aborted also increases.
 
 
 
@@ -59,46 +54,38 @@ T/O其实思想很简单：按txn进场顺序分配timestamp，然后保证txn�
 
 ![image-20220115165543602]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115165543602.png' | relative_url}})
 
-还有另一种写规则叫做**Thomas Write Rule**，这里简单介绍一下。简单来说，在普通写规则的基础上，Thomas Write Rule对于要去写一个未来写过的资源这种情况，直接skip（本来是要abort的）。通过上图右边的例子就能直观地理解这个规则了。
-
-
+There is another kind of write rule called **Thomas Write Rule**, which is briefly described here. Simply put, on top of the normal write rule, the Thomas Write Rule directly skips a resource that was written in the future (and was meant to be aborted). This rule can be understood intuitively by the example on the right side of the figure above.
 
 ### 1.3 **strict T/O**
 
-同样的，普通的T/O也会面临cascading rollback问题，我们可以通过给普通T/O加一些条件成**strict T/O**来解决。
+Similarly, ordinary T/O will also face cascading rollback problem, which we can solve by adding some conditions to ordinary T/O into **strict T/O**.
 
 > **strict T/O**
->
 > Delay read or write requests until the youngest txn who wrote X before has committed or aborted.
 
+## 2. Optimistic Concurrency Control
 
-
-## 2. Optimistic  Concurrency Control
-
-先略后补
-
-
+Optimistic Concurrency Control (OCC) is a type of concurrency control for relational databases. OCC assumes that multiple transactions can complete without affecting each other, and therefore transactions can proceed without locking any resources. When a transaction is ready to commit, it validates that no other transactions have modified the data it has read. If this validation fails, the transaction is rolled back and can be restarted.
 
 ## 3.  Recoverable Schedule
 
-接下来介绍**recoverable schedule**. 什么是recoverable的呢？每一个txn都commit了才叫recoverable的，否则DBMS不能保证可以恢复数据。
+Next, let's discuss the concept of a recoverable schedule. So, what is a recoverable schedule? It refers to a state where every transaction has committed, which allows the DBMS to ensure data recovery.
 
 > **What is recoverable schedule?**
->
 > A schedule is recoverable if txns commit only after <u>all txns</u> whose changes they read, <u>commit</u>.
 
 ![image-20220115170136786]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115170136786.png' | relative_url}})
 
+This concept is crucial to maintain the integrity and consistency of data in the event of failures. The ability to recover to a consistent state after a failure is a key aspect of any reliable database system.
 
 
 ## 4. Isolation Level
 
-Serializability可以允许我们解决并发问题，但强制执行它可能会parallelism降低而并限制性能。所以我们引入Isolation Level，使用weaker level of consistency 去 improve scalability.
-
 > ![image-20220115173019814]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115173019814.png' | relative_url}})
 
-大部分数据库默认的隔离等级事read committed. MySQL默认repeatable read.
+The isolation level of a transaction refers to the degree to which the changes made by one transaction are visible to other concurrent transactions. There are four isolation levels defined by the SQL standard, each providing a different balance between performance and the likelihood of concurrency phenomena. The four levels, in increasing order of isolation, are Read Uncommitted, Read Committed, Repeatable Read, and Serializable.
 
+Understanding the trade-offs between the different isolation levels helps in selecting the most appropriate level for a particular transaction or application, considering factors such as the nature of the data, the requirements of the application, and the acceptable level of risk for concurrency phenomena like dirty reads, non-repeatable reads, and phantom reads.
 
 
 

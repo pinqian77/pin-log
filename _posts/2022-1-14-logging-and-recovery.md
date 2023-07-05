@@ -1,147 +1,147 @@
 ---
 layout: post
-comments: true
 title: "Database System: Logging and Recovery"
 date: 2022-1-14 02:00:00
-tags: Database 15-445
+tags: 15-445
 ---
 
-
-
-> 这篇笔记主要记录 Logging 和 recovery 机制。
->
-> 1. Logging: txn正常进行时，进行一些记录，使得万一要是crash了能够通过这些记录复原
-> 2. Recovery: txn crash/failure了，系统重启后对数据库进行恢复操作。
+> This note documents the mechanisms of logging and recovery.
+> 1. Logging: As transactions normally proceed, some records are made so that in case of a crash, these records can be used for recovery.
+> 2. Recovery: If a transaction crashes/fails, after the system restarts, the database needs to perform recovery operations.
 
 <!--more-->
 
-
-
-首先，我们要清楚，是什么导致数据库需要去recovery，换言之，我们之前一直在说的failure到底指什么。我们能去恢复的只有前两个：
+Firstly, we need to be clear about what causes the database to need to recover, in other words, what we've been talking about - what does failure actually mean? We can only recover the first two:
 
 1. Transaction Failure
-   - Logical error （txn冲突了）
-   - Internal state error （如deadlock了必须abort某个txn）
+   - Logical error (transaction conflict)
+   - Internal state error (e.g., must abort a transaction if there's a deadlock)
 2. System Failure
-   - Software Failure （像除0运算）
-   - Hardware Failure（power failure要注意的是，当我们在讨论这个时，我们是假设disk中的数据是不会被损坏的）
+   - Software Failure (like a division by zero operation)
+   - Hardware Failure (power failure; when we discuss this, we are assuming that the data on the disk will not be damaged)
 3. Storage Media Failure
 
-
-
-那么接下来，我们就来说说logging，分别从why和how两个方面去介绍（跳过了15445中有些内容）。
-
-
+Next, let's talk about logging, introducing from both why and how perspectives.
 
 ## 1. Why there are multiple logging mechanisms
 
-我们必须先知道一点Schedule，Buffer Pool，Disk间运行的机制。下面通过一个例子来说明一下流程：
+We first need understand the operation mechanism between Schedule, Buffer Pool, and Disk. Let's illustrate the process with an example:
 
 ![image-20220114184213317]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114184213317.png' | relative_url}})
 
-我们从左图读数据开始。**Schedule**受**Execution Engine**控制，我们现在要读A，那么Execution Engine会向**Buffer Pool**发出请求A，Buffer Pool查看A所在的**Page**是否在Pool中，如果已经在了，就给Execution Engine一个**Pointer**，并在之后确保这个含A的Page会一直在Pool中；如果不在，就从**Disk**中找到A所在的Page，将整个Page移到Pool中，然后做上述操作。
+We start with reading data from the left diagram. The **Schedule** is controlled by the **Execution Engine**. Now we want to read A, so the Execution Engine sends a request for A to the **Buffer Pool**. The Buffer Pool checks whether the Page where A is located is in the Pool. If it is already there, it gives a **Pointer** to the Execution Engine and ensures that the **Page** containing A will always be in the Pool afterward. If it is not, it finds the Page where A is located from the **Disk**, moves the entire Page into the Pool, and then performs the above operations.
 
-然后看右图写数据。Execution Engine被分发的Pointer指向A所在Page的内存地址，可以对A进行写操作。写操作是发生在内存中的Buffer Pool中，在txn未commit前，改动的数据都不会写入Disk中（这句话可能不严谨，因为在Steal Policy的情况下，未发起commit的txn改动的数据可能会躺枪，被另一个发起commit的txn连带着把数据写回Disk）。我们把有过数据改动，但还没写回Disk的Page叫做**Dirty Page**.
+Then look at writing data in the right diagram. The Execution Engine, directed by the dispatched Pointer, can perform write operations on A. Write operations occur in the Buffer Pool in memory. Before the transaction commits, the modified data will not be written into the Disk (this statement may not be rigorous because in the case of Steal Policy, the data modified by the transaction that has not initiated commit may be accidentally written back to Disk by another transaction that has initiated commit). We call the Page that has been modified but not yet written back to Disk a **Dirty Page**.
 
 ![image-20220114185700126]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114185700126.png' | relative_url}})
 
-之后看COMMIT操作，在这里，我会把这个COMMIT和Log机制的联系说一下。
+Next, look at the COMMIT operation. Here, I will explain the connection between this COMMIT and the Log mechanism.
 
-当一个txn发起COMMIT时，到底发生了什么？我觉得我们得把COMMIT分解，分解成一个是**txn**发起COMMIT的动作，另一个是**Log Manager**把COMMIT这则log写入Disk的动作。但COMMIT的目的是什么呢？是要把数据写回Disk。我们在这里讲三种log方式，其实讲的是，我应该在txn发起COMMIT请求后的**什么时候**，把Log Manager的COMMIT写入Disk，因为只有Disk中的数据才是稳定安全的，而Log也在Disk中。而这个“什么时候”，指的就是把数据写回Disk这个时间点，如果COMMIT Log写在数据写回Disk之后，我们采用的就是undo log；如果COMMIT Log写在数据写回Disk之前，我们采用的就是redo log. 具体的不同会在之后说到。
+When a transaction initiates a COMMIT, what exactly happens? I think we need to decompose COMMIT into two parts: one is the action of the transaction initiating a COMMIT, and the other is the action of the **Log Manager** writing this COMMIT log into the Disk. But what is the purpose of COMMIT? It's to write data back to Disk. Here, we talk about three log methods, which are actually about when to write the COMMIT from the Log Manager into the Disk after the transaction initiates a COMMIT request, because only the data in the Disk is stable and safe, and the Log is also on Disk. This "when" refers to the point in time when the data is written back to Disk. If the COMMIT Log is written after the data is written back to Disk, we use the undo log; if the COMMIT Log is written before the data is written back to Disk, we use the redo log. The specific differences will be mentioned later.
 
 ![image-20220114192416468]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114192416468.png' | relative_url}})
 
-还有两个比较重要的概念也需要讲一下：**Force** 和 **Steal** policy.
+There are also two important concepts to talk about: **Force** and **Steal** policy.
 
-如果我们采用Force Policy，那意味着，该txn的数据必须在此时被写回Disk中（force to be written to disk）。但我们知道，Buffer Pool移动的是Page，那对于上图被改动过的A怎么办呢，它所在的txn还未发起COMMIT. 这就涉及到是否允许Steal Page. 如果我们允许还未COMMIT的A也连带着被写回Disk，那么这就是Steal Policy；如果我们不允许A被写回Disk，那就是Non-Steal Policy. 
+If we adopt the Force Policy, it means that the data from this transaction must be written back to Disk at this time (forced to be written to disk). However, we know that the Buffer Pool operates with Pages, so what about the modified A in the figure above? The transaction it is part of has not initiated a COMMIT yet. This involves whether we allow Steal Page. If we allow the A that has not yet COMMITted to be written back to Disk along with it, then this is Steal Policy; if we do not allow A to be written back to Disk, then this is a Non-Steal Policy.
 
-上图展现的是NO-STEAL + FORCE策略。这个策略有什么好处呢？第一，对于所有aborted txn，我们没有必要去做undo操作，因为no-steal policy保证了它不会被其他txn影响，也就是说不会被连带着写回Disk；第二，对于所有committed txn，我们没有必要去做redo操作，因为force policy保证了它在发起COMMIT请求时就把数据写回Disk（这里我们假设写回Disk的过程中不会发生故障）。
+The above diagram displays the NO-STEAL + FORCE strategy. What are the benefits of this policy? Firstly, for all aborted transactions, we don't need to perform undo operations, because the no-steal policy ensures that it will not be affected by other transactions, which means it will not be written back to Disk along with them. Secondly, for all committed transactions, we don't need to perform redo operations because the force policy guarantees that it writes the data back to Disk when initiating a COMMIT request (here we assume that there will be no faults during the process of writing back to Disk).
 
 ![image-20220114194202271]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114194202271.png' | relative_url}})
 
-至此，基本内容搞定了。我在学的时候就很迷惑，既然我们可以实现NO-STEAL + FORCE避免undo 和 redo，为什么还要有undo log 和 redo log呢...原因是NO-STEAL + FORCE性能太低了，会造成很多细小的磁盘IO而导致性能降低。通常，我们在实现Buffer Pool时都是用**NO-FORCE + STEAL**策略，**NO-FORCE意味着commit的东西可能没成功被写回去，那就需要redo（保证Durability）；STEAL 意味着没commit的东西可能被写回去了，那就需要undo（维护Atomicity）**，因此，我们需要一系列的log机制。
+Why do we still have undo logs and redo logs since we can implement NO-STEAL + FORCE to avoid undo and redo... The reason is that the performance of NO-STEAL + FORCE is too low, it will cause many small disk IOs, leading to decreased performance. Usually, when we implement Buffer Pool, we use a **NO-FORCE + STEAL** policy. **NO-FORCE means that committed items might not have been successfully written back, thus we need redo (to ensure Durability); STEAL means that uncommitted items might have been written back, thus we need undo (to maintain Atomicity)**. Therefore, we need a series of logging mechanisms.
 
 
-总的来说，Logging就是做记录，做记录是为了以防万一需要Recovery，那么根据上面所讲的，我们可以得出以下这个在什么时候需要什么样的log的表格:
+In general, Logging is for making records, and making records is in case we need to Recovery. Based on what has been discussed above, we can conclude the following table about when what kind of log is needed:
 
 |              | No Steal |    Steal    |
 | :----------: | :------: | :---------: |
 | **No Force** |   redo   | redo + undo |
 |  **Force**   |  ------  |    undo     |
 
-
-
-
-
-## 2. How logging and recovery work
+### 2. How Logging and Recovery Work
 
 ### 2.1 Undo log
 
-```markdown
-logging 过程
-1. txn 开始，记录START T
-2. txn write(X)，记录(T，X，v) <-- X是修改对象，v是old value
-3. txn 把committed updates写入disk
-4. txn 记录COMMIT T (或者 ABORT T)
+The Undo log is used to ensure Atomicity - the property of a transaction that guarantees that all operations in a transaction are executed or none are.
 
-recovery 过程
-1. 从新到旧扫描log，找到所有已经START，但还没COMMIT的txn
-2. 对于所有没有COMMIT的txn，根据undo log rollback到START前的状态
-```
+The **logging process** for the Undo log is as follows:
 
-回顾一下，为什么需要undo？没COMMIT的txn的数据可能因为STEAL POLICY被写到Disk了。
+1. A transaction (txn) starts, recording START T.
+2. The txn writes (X), and records (T, X, v) - where X is the modified object, and v is the old value.
+3. The txn writes committed updates to disk.
+4. The txn records COMMIT T (or ABORT T).
 
-那么在recovery时，我们得把所有log中没有COMMIT记录的txn都给找到，让他们 undo，也就是 rollback 到START前的状态。
+The **recovery process** using the Undo log is as follows:
 
+1. Scan the log from newest to oldest, finding all txns that have STARTed but have not yet COMMITted.
+2. For all txns that have not COMMITted, roll back to the state before START, using the Undo log.
 
+Recall why we need undo? The data of txns that haven't COMMITted might have been written to Disk because of STEAL POLICY.
+
+Therefore, during recovery, we need to find all txns in the log that don't have a COMMIT record, and undo them, which means rolling back to the state before START.
 
 ### 2.2 Redo log
 
-```markdown
-logging 过程
-1. txn 开始，记录START T
-2. txn write(X)，记录(T，X，v) <-- X是修改对象，v是new value
-3. txn 记录COMMIT T (或者 ABORT T)
-4. txn 把committed updates写入disk
+The Redo log is used to ensure Durability - the property of a transaction that guarantees that the results of committed transactions survive permanently.
 
-recovery 过程
-1. 从旧到新扫描log，找到所有已经COMMIT的txn
-2. 对于已经COMMIT的txn，根据redo log去redo txn
-```
+The **logging process** for the Redo log is as follows:
 
-为什么需要redo？已经COMMIT的txn可能因为NO-FORCE POLICY没成功写到Disk上。
+1. A txn starts, recording START T.
+2. The txn writes (X), and records (T, X, v) - where X is the modified object, and v is the new value.
+3. The txn records COMMIT T (or ABORT T).
+4. The txn writes committed updates to disk.
 
-那么在recovery时，我们得把所有已经COMMIT的txn重做一遍，以确保它们真的都被写到Disk上；那么对于没有COMMIT的txn，就直接按abort处理，直接ignore不进行任何操作就行了。
+The **recovery process** using the Redo log is as follows:
 
+1. Scan the log from oldest to newest, finding all txns that have COMMITted.
+2. For all COMMITted txns, redo the txn using the Redo log.
 
+Why do we need redo? The txns that have already COMMITted might not have been successfully written to Disk because of the NO-FORCE POLICY.
+
+Therefore, during recovery, we need to redo all the txns that have already COMMITted to make sure they've truly been written to Disk. For those txns that have not COMMITted, we handle them as aborts, ignoring them and not performing any operations.
 
 ### 2.3 Redo/Undo log
 
-```markdown
-logging 过程
-1. txn 开始，记录START T
-2. txn write(X)，记录(T, X, v, w) <-- X是修改对象，v是old value, w是new value
-3. txn 记录COMMIT T (或者 ABORT T)  || txn 把committed updates写入disk
+The Redo/Undo log is a combination of the Redo and Undo logs that ensures both Atomicity and Durability.
 
-recovery 过程
-1. 从新到旧扫描找到所有没COMMIT的txn，从旧到新扫描找到COMMIT的txn
-2. undo没COMMIT的txn，redo COMMIT的txn
-```
+The **logging process** for the Redo/Undo log is as follows:
 
-Redo/Undo log的第三步顺序都可以，在恢复的时候，使用UNDO LOG去undo没有COMMIT的txn，使用REDO LOG去redo COMMIT了的txn。
+1. A transaction (txn) starts, recording START T.
+2. The txn writes (X), and records (T, X, v, w) - where X is the modified object, v is the old value, and w is the new value.
+3. The txn records COMMIT T (or ABORT T)  or  the txn writes committed updates to disk.
 
+The **recovery process** using the Redo/Undo log is as follows:
 
+1. Scan the log from newest to oldest to find all txns that haven't COMMITted, and from oldest to newest to find all COMMITted txns.
+2. Undo the txns that haven't COMMITted, and redo the txns that have COMMITted.
+
+In the third step of the Redo/Undo log process, either order is fine. During recovery, the UNDO LOG is used to undo the txns that have not COMMITted, and the REDO LOG is used to redo the txns that have COMMITted.
 
 ## 3. Checkpoint
 
-为了更快地recovery和更好的利用空间，我们引入checkpoint机制（这里只看了学校课件，15445的课到时候补上）。
+To speed up recovery and better utilize space, we introduce the concept of a checkpoint. The core idea of a checkpoint mechanism is to periodically save the state of the system. In the event of a system failure, recovery can begin from the most recent checkpoint rather than starting from scratch.
 
 ### 3.1 Simple Checkpoint
 
+In the simple checkpoint mechanism, the system periodically generates a checkpoint, pausing all transaction execution, writing all modified but yet to be written to disk data pages (also called dirty pages), and transaction logs to disk, then resuming transaction execution.
+
 ![image-20220114204941070]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114204941070.png' | relative_url}})
+
+During system recovery, we can start from the most recent checkpoint and redo and undo all transaction logs after this. The drawback of this method is that it requires pausing all transaction execution when generating a checkpoint, which can degrade system performance if there are many transactions or a large amount of data.
 
 ### 3.2 ARIES Checkpoint for undo/redo log
 
-貌似学校讲的ARIES Checkpoint就是上面这张图...
+ARIES (Algorithm for Recovery and Isolation Exploiting Semantics) is a widely used recovery algorithm that provides an efficient checkpoint mechanism. Unlike the simple checkpoint mechanism, ARIES doesn't need to pause all transaction execution when generating a checkpoint. It just needs to record the information of currently executing transactions and all dirty pages in the system.
 
-ARIES Checkpoint的细节日后一定补上！
+The ARIES checkpoint mechanism has three important steps:
+
+BEGIN CHECKPOINT: At the beginning of generating a checkpoint, the system generates a BEGIN CHECKPOINT record and writes it to the log. This record contains information about all transactions currently being executed.
+
+Save dirty page information: The system records the information of all current dirty pages and writes this information to disk. This information can be used to determine which pages may need redo operations during system recovery.
+
+END CHECKPOINT: The system generates an END CHECKPOINT record and writes it to the log. This record contains information about all transactions that started after BEGIN CHECKPOINT and ended before END CHECKPOINT, as well as all dirty pages in the system at the time of END CHECKPOINT.
+
+During system recovery, ARIES first starts from the most recent checkpoint, then analyzes all transaction logs after this, deciding which transactions need redo and undo operations.
+
+Compared with the simple checkpoint mechanism, the ARIES checkpoint mechanism can generate checkpoints without pausing transaction execution, thus improving system performance.

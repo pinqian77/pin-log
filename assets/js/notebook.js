@@ -41,7 +41,7 @@
       if (!heading.id) heading.id = `section-${i + 1}`;
       const link = document.createElement('a'); link.href = `#${heading.id}`; link.textContent = heading.textContent; link.dataset.level = heading.tagName === 'H3' ? '3' : '2'; contents.append(link);
     });
-    if ('IntersectionObserver' in window) {headingObserver = new IntersectionObserver(entries => {const visible = entries.find(entry => entry.isIntersecting); if (!visible) return; contents.querySelectorAll('a').forEach(link => link.setAttribute('aria-current', String(link.hash.slice(1) === visible.target.id)));}, {rootMargin: '-5% 0px -75% 0px'}); headings.forEach(h => headingObserver.observe(h));}
+    if ('IntersectionObserver' in window) {headingObserver = new IntersectionObserver(entries => {const visible = entries.find(entry => entry.isIntersecting); if (!visible) return; contents.querySelectorAll('a').forEach(link => link.setAttribute('aria-current', String(link.getAttribute('href').slice(1) === visible.target.id)));}, {rootMargin: '-5% 0px -75% 0px'}); headings.forEach(h => headingObserver.observe(h));}
   }
   const filterButtons = [...document.querySelectorAll('[data-topic-filter]')]; let topic = 'all';
   function renderFilter() {

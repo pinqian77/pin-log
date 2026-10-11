@@ -1,4 +1,5 @@
 ---
+published: false
 layout: post
 title: "Database System: Logging and Recovery"
 date: 2022-1-14 02:00:00

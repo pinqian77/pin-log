@@ -1,4 +1,5 @@
 ---
+published: false
 layout: post
 title: "Database System: Timestamp Ordering Concurrency Control"
 date: 2022-1-12 02:00:00

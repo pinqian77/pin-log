@@ -1,4 +1,5 @@
 ---
+published: false
 layout: post
 title: "Database System: Concurrency Control Theory"
 date: 2021-12-30 02:00:00

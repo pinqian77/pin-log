@@ -1,4 +1,5 @@
 ---
+published: false
 layout: post
 title: "Database System: Two-Phase Locking Concurrency Control"
 date: 2022-1-08 02:00:00

@@ -3,6 +3,13 @@ layout: post
 title: "Database System: Logging and Recovery"
 date: 2022-1-14 02:00:00
 tags: 15-445
+title_zh: 数据库：日志与恢复
+summary: What survives a crash? Logging, undo and redo, buffer-pool policies, and checkpoints.
+summary_zh: 崩溃之后，什么能被保留下来？理解日志、重做与撤销、缓冲池策略和检查点。
+visual: logging
+translation_zh: translations/logging.md
+takeaway: Steal requires undo for atomicity; no-force requires redo for durability.
+takeaway_zh: Steal 需要 Undo 保证原子性；No-force 需要 Redo 保证持久性。
 ---
 
 > This note documents the mechanisms of logging and recovery.
@@ -27,19 +34,19 @@ Next, let's talk about logging, introducing from both why and how perspectives.
 
 We first need understand the operation mechanism between Schedule, Buffer Pool, and Disk. Let's illustrate the process with an example:
 
-![image-20220114184213317]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114184213317.png' | relative_url}})
+![image-20220114184213317]({{'/assets/images/2022-1-14-logging-and-recovery/image-20220114184213317.png' | relative_url}})
 
 We start with reading data from the left diagram. The **Schedule** is controlled by the **Execution Engine**. Now we want to read A, so the Execution Engine sends a request for A to the **Buffer Pool**. The Buffer Pool checks whether the Page where A is located is in the Pool. If it is already there, it gives a **Pointer** to the Execution Engine and ensures that the **Page** containing A will always be in the Pool afterward. If it is not, it finds the Page where A is located from the **Disk**, moves the entire Page into the Pool, and then performs the above operations.
 
 Then look at writing data in the right diagram. The Execution Engine, directed by the dispatched Pointer, can perform write operations on A. Write operations occur in the Buffer Pool in memory. Before the transaction commits, the modified data will not be written into the Disk (this statement may not be rigorous because in the case of Steal Policy, the data modified by the transaction that has not initiated commit may be accidentally written back to Disk by another transaction that has initiated commit). We call the Page that has been modified but not yet written back to Disk a **Dirty Page**.
 
-![image-20220114185700126]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114185700126.png' | relative_url}})
+![image-20220114185700126]({{'/assets/images/2022-1-14-logging-and-recovery/image-20220114185700126.png' | relative_url}})
 
 Next, look at the COMMIT operation. Here, I will explain the connection between this COMMIT and the Log mechanism.
 
 When a transaction initiates a COMMIT, what exactly happens? I think we need to decompose COMMIT into two parts: one is the action of the transaction initiating a COMMIT, and the other is the action of the **Log Manager** writing this COMMIT log into the Disk. But what is the purpose of COMMIT? It's to write data back to Disk. Here, we talk about three log methods, which are actually about when to write the COMMIT from the Log Manager into the Disk after the transaction initiates a COMMIT request, because only the data in the Disk is stable and safe, and the Log is also on Disk. This "when" refers to the point in time when the data is written back to Disk. If the COMMIT Log is written after the data is written back to Disk, we use the undo log; if the COMMIT Log is written before the data is written back to Disk, we use the redo log. The specific differences will be mentioned later.
 
-![image-20220114192416468]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114192416468.png' | relative_url}})
+![image-20220114192416468]({{'/assets/images/2022-1-14-logging-and-recovery/image-20220114192416468.png' | relative_url}})
 
 There are also two important concepts to talk about: **Force** and **Steal** policy.
 
@@ -47,7 +54,7 @@ If we adopt the Force Policy, it means that the data from this transaction must 
 
 The above diagram displays the NO-STEAL + FORCE strategy. What are the benefits of this policy? Firstly, for all aborted transactions, we don't need to perform undo operations, because the no-steal policy ensures that it will not be affected by other transactions, which means it will not be written back to Disk along with them. Secondly, for all committed transactions, we don't need to perform redo operations because the force policy guarantees that it writes the data back to Disk when initiating a COMMIT request (here we assume that there will be no faults during the process of writing back to Disk).
 
-![image-20220114194202271]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114194202271.png' | relative_url}})
+![image-20220114194202271]({{'/assets/images/2022-1-14-logging-and-recovery/image-20220114194202271.png' | relative_url}})
 
 Why do we still have undo logs and redo logs since we can implement NO-STEAL + FORCE to avoid undo and redo... The reason is that the performance of NO-STEAL + FORCE is too low, it will cause many small disk IOs, leading to decreased performance. Usually, when we implement Buffer Pool, we use a **NO-FORCE + STEAL** policy. **NO-FORCE means that committed items might not have been successfully written back, thus we need redo (to ensure Durability); STEAL means that uncommitted items might have been written back, thus we need undo (to maintain Atomicity)**. Therefore, we need a series of logging mechanisms.
 
@@ -126,7 +133,7 @@ To speed up recovery and better utilize space, we introduce the concept of a che
 
 In the simple checkpoint mechanism, the system periodically generates a checkpoint, pausing all transaction execution, writing all modified but yet to be written to disk data pages (also called dirty pages), and transaction logs to disk, then resuming transaction execution.
 
-![image-20220114204941070]({{'//assets/images/2022-1-14-logging-and-recovery/image-20220114204941070.png' | relative_url}})
+![image-20220114204941070]({{'/assets/images/2022-1-14-logging-and-recovery/image-20220114204941070.png' | relative_url}})
 
 During system recovery, we can start from the most recent checkpoint and redo and undo all transaction logs after this. The drawback of this method is that it requires pausing all transaction execution when generating a checkpoint, which can degrade system performance if there are many transactions or a large amount of data.
 

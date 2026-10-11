@@ -1,0 +1,1 @@
+{% assign topic_info = site.data.topics[include.tag] %}<span class="lang-en">{{ topic_info.en | default: include.tag | replace: '-', ' ' | escape }}</span><span class="lang-zh" lang="zh-CN">{{ topic_info.zh | default: include.tag | replace: '-', ' ' | escape }}</span>

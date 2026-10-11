@@ -3,7 +3,7 @@ name: "Pin's Blog"
 author: Pin Qian
 twitter_username: qian_pin
 baseurl: "/pin-log"
-description: Document my learning notes.
+description: Learning notes, open questions, and observations from wherever curiosity leads.
 profile_url: "https://pinqian77.github.io"
 
 # Build settings
@@ -16,8 +16,18 @@ plugins:
 exclude:
   - Gemfile
   - Gemfile.lock
+  - README.md
+  - docs
+  - scripts
+  - node_modules
+  - package.json
+  - package-lock.json
 kramdown:
   input: GFM
   auto_ids: true
   syntax_highlighter: rouge
   toc_levels: 1..3
+
+
+url: "https://pinqian77.github.io"
+lang: en

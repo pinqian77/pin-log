@@ -1,0 +1,10 @@
+15-445:
+  en: Systems
+  zh: 系统
+  description_en: Databases, concurrency, and recovery.
+  description_zh: 数据库、并发控制与恢复。
+reinforcement-learning:
+  en: Reinforcement learning
+  zh: 强化学习
+  description_en: Policies, experience, and learning through interaction.
+  description_zh: 策略、经验，以及在交互中学习。

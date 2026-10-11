@@ -3,6 +3,17 @@ layout: post
 title: "Understanding On-policy and Off-policy"
 date: 2021-4-29 02:00:00
 tags: reinforcement-learning
+title_zh: 理解 On-policy 与 Off-policy
+display_title: Who acts? Who learns?
+display_title_zh: 谁在行动，谁在学习？
+summary: Who collects the experience, and who learns from it? A note on behavior policies, target policies, SARSA, and Q-learning.
+summary_zh: 谁收集经验，谁从经验中学习？从行为策略与目标策略出发，理解 SARSA 与 Q-learning。
+visual: policy
+featured: true
+translation_zh: translations/on-policy.md
+takeaway: On-policy learning uses experience from the current target policy; off-policy learning can use experience generated
+  by a different behavior policy.
+takeaway_zh: On-policy 从当前目标策略产生的经验中学习；Off-policy 可以从另一种行为策略产生的经验中学习。
 ---
 
 > This article discusses the difference between on-policy and off-policy methods in reinforcement learning. On-policy methods use data derived from the same policy to optimize the target policy, while off-policy methods use data from a behavior policy for optimization. The concepts are exemplified with SARSA and Q-learning.

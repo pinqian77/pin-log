@@ -1,24 +1,10 @@
-<header class="site-header" role="banner" id='header-bar'>
-
-    <div class="wrapper">
-        {% assign default_paths = site.pages | map: "path" %}
-        <a class="site-title" href="{{ "/" | relative_url }}">{{ site.title | escape }}</a>
-
-        <nav class="site-nav">
-            <a class="page-link" href="https://pinqian77.github.io"> About</a>
-        </nav>
-        <nav class="site-nav">
-            <a class="page-link" href="{{ '/archive.html' | relative_url }}">Archive</a>
-        </nav>
-        <nav class="site-nav">
-            <a class="page-link" href="{{ '/tags.html' | relative_url }}">Tags</a>
-            
-        <!-- <nav class="site-nav">
-            <a class="page-link" href="{{ '/contact.html' | relative_url }}">&#x1f984; Contact</a>
-        </nav> -->
-        <!-- <nav class="site-nav">
-            <a class="page-link" href="{{ '/FAQ.html' | relative_url }}">&#x1F64B; FAQ</a>
-        </nav> -->
-    </div>
-
-</header>
+<header class="site-header"><div class="site-width header-inner">
+  <a class="wordmark" href="{{ '/' | relative_url }}" aria-label="Pin'Log home">Pin<span>’</span>Log</a>
+  <nav class="site-nav" aria-label="Main navigation">
+    <a href="{{ '/' | relative_url }}" {% if page.url == '/' %}aria-current="page"{% endif %}><span class="lang-en">Notes</span><span class="lang-zh" lang="zh-CN">笔记</span></a>
+    <a href="{{ '/tags.html' | relative_url }}" {% if page.url == '/tags.html' %}aria-current="page"{% endif %}><span class="lang-en">Topics</span><span class="lang-zh" lang="zh-CN">主题</span></a>
+    <a href="{{ '/archive.html' | relative_url }}" {% if page.url == '/archive.html' %}aria-current="page"{% endif %}><span class="lang-en">Archive</span><span class="lang-zh" lang="zh-CN">归档</span></a>
+    <a href="{{ site.profile_url }}"><span class="lang-en">About ↗</span><span class="lang-zh" lang="zh-CN">关于我 ↗</span></a>
+  </nav>
+  <div class="language-switch" role="group" aria-label="Reading language"><button type="button" data-set-language="en" aria-pressed="true">EN</button><button type="button" data-set-language="zh" aria-pressed="false" lang="zh-CN">中文</button></div>
+</div></header>

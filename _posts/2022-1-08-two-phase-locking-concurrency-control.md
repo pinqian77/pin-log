@@ -3,6 +3,13 @@ layout: post
 title: "Database System: Two-Phase Locking Concurrency Control"
 date: 2022-1-08 02:00:00
 tags: 15-445
+title_zh: 数据库：两阶段锁与并发控制
+summary: Growing and shrinking phases, strict locking, deadlocks, and intention locks.
+summary_zh: 增长与收缩阶段、严格锁协议、死锁，以及意向锁。
+visual: locking
+translation_zh: translations/locking.md
+takeaway: A transaction acquires locks in its growing phase. After it begins releasing locks, it cannot acquire new ones.
+takeaway_zh: 事务在增长阶段获得锁；一旦开始释放锁，就不能再获得新的锁。
 ---
 
 > This lesson mainly introduces the Two-Phase Locking mechanism. After learning, you can master:
@@ -119,9 +126,10 @@ Finally, the introduction of **Intention locks** to achieve **Hierarchical Locki
 
 To summarize, if we want to set S or IS on a node, then the node's parent node must be set to at least IS; if we want to set X, IX, or SIX on a node, then the node's parent node must be set to at least IX.
 
-![image-20211227211109853]({{'//assets/images/2022-1-08-two-phase-locking-concurrency-control/image-20211227211109853.png' | relative_url}})
+![image-20211227211109853]({{'/assets/images/2022-1-08-two-phase-locking-concurrency-control/image-20211227211109853.png' | relative_url}})
 
 So far, our schedule classification has been further expanded. In fact, you can look at this category of No cascading aborts separately, after all, strong strict 2PL is designed to avoid cascading aborts, which is stricter than conflict serializable and weaker than serial, so it is better to remember.
 
 ![image-20211227200617795]({{'/assets/images/2022-1-08-two-phase-locking-concurrency-control/image-20211227200617795.png' | relative_url}})
+
 

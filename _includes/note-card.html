@@ -1,0 +1,6 @@
+<article class="note-card" data-note-tags="{{ include.post.tags | jsonify | escape }}">
+  <a class="note-cover-link" href="{{ include.post.url | relative_url }}" aria-label="{{ include.post.title | escape }}">{% include note-cover.html visual=include.post.visual %}</a>
+  <div class="note-meta"><time datetime="{{ include.post.date | date_to_xmlschema }}">{{ include.post.date | date: '%b %d, %Y' }}</time><span class="meta-dot">·</span>{% assign card_tag = include.post.tags | first %}{% include topic-label.html tag=card_tag %}</div>
+  <h3><a href="{{ include.post.url | relative_url }}"><span class="lang-en">{{ include.post.title | escape }}</span><span class="lang-zh" lang="zh-CN">{{ include.post.title_zh | default: include.post.title | escape }}</span></a></h3>
+  <p class="note-summary"><span class="lang-en">{{ include.post.summary | default: include.post.excerpt | strip_html | normalize_whitespace | truncate: 200 | escape }}</span><span class="lang-zh" lang="zh-CN">{{ include.post.summary_zh | default: include.post.summary | default: include.post.excerpt | strip_html | normalize_whitespace | truncate: 200 | escape }}</span></p>
+</article>

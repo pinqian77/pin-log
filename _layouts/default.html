@@ -1,24 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ page.lang | default: site.lang | default: "en" }}">
-
+<html lang="en" data-language="en">
   {% include head.html %}
-
-  <body>
-
+  <body id="top">
+    <a class="skip-link" href="#main"><span class="lang-en">Skip to content</span><span class="lang-zh" lang="zh-CN">跳到正文</span></a>
     {% include header.html %}
-
-    <!-- Back to top button -->
-    <script src="{{ '/assets/vanilla-back-to-top.min.js' | relative_url }}"></script>
-    <script>addBackToTop()</script>
-
-    <main class="page-content" aria-label="Content">
-      <div class="wrapper">
-        {{ content }}
-      </div>
-    </main>
-
+    <main id="main" class="site-main">{{ content }}</main>
     {% include footer.html %}
-
   </body>
-
 </html>

@@ -3,6 +3,11 @@ layout: post
 title: "Database System: Timestamp Ordering Concurrency Control"
 date: 2022-1-12 02:00:00
 tags: 15-445
+title_zh: 数据库：时间戳排序并发控制
+summary: How timestamps coordinate concurrent transactions, from basic ordering rules to recovery and isolation levels.
+summary_zh: 时间戳如何协调并发事务：从基本排序规则，到恢复与隔离级别。
+visual: timestamp
+translation_zh: translations/timestamp.md
 ---
 
 > The previous lesson introduced Two-Phase Locking Concurrency Control, a method of concurrency control implemented using the lock mechanism. This note focuses on Timestamp Ordering Concurrency Control, which is based entirely on timestamps and does not use locks. In this lesson, you can understand:
@@ -14,7 +19,7 @@ tags: 15-445
 
 
 
-![image-20220115155901834]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115155901834.png' | relative_url}})
+![image-20220115155901834]({{'/assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115155901834.png' | relative_url}})
 
 ## 1. Rules of Timestamp Ordering
 
@@ -28,7 +33,7 @@ The idea of T/O is actually very simple: assign timestamps in the order of txn e
 >
 > Use timestamps to determine the serializability order of txns. If $TS(t_i) < TS(t_j)$, then the DBMS must ensure that the execution schedule is equivalent to a serial schedule where $T_i$ appears before $T_j$.
 
-![image-20211228132151727]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20211228132151727.png' | relative_url}})
+![image-20211228132151727]({{'/assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20211228132151727.png' | relative_url}})
 
 At the beginning of each txn, a timestamp is assigned as $TS(t_i)$. What is the purpose of this txn timestamp? It is associated with the resource to be read or written.
 
@@ -40,7 +45,7 @@ For writes, if a resource is being read by a future txn, or has already been wri
 
 Here are two examples:
 
-![image-20220115163935694]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115163935694.png' | relative_url}})
+![image-20220115163935694]({{'/assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115163935694.png' | relative_url}})
 
 Let's first look at the figure on the left. T1 starts first, followed by T2, so they receive timestamps 1 and 2 respectively. In chronological order, T1 reads B, which doesn't violate any rules, and B's R-TS is updated to 1; T2 reads B, which also doesn't violate any rules, and B's R-TS is updated to 2; T2 writes to B, which again doesn't violate any rules, and B's W-TS is updated to 2; T1 reads A, which doesn't violate any rules, and A's R-TS is updated to 1; T2 reads A, which doesn't violate any rules, and A's W-TS is updated to 2; T1 reads A again, which doesn't violate any rules, and A's R-TS remains at 2; T2 writes to A, which doesn't violate any rules, and A's W-TS is updated to 2.
 
@@ -52,7 +57,7 @@ This type of Timestamp Ordering (T/O) protocol ensures that the schedule is alwa
 
 ### 1.2 Thomas Write Rule
 
-![image-20220115165543602]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115165543602.png' | relative_url}})
+![image-20220115165543602]({{'/assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115165543602.png' | relative_url}})
 
 There is another kind of write rule called **Thomas Write Rule**, which is briefly described here. Simply put, on top of the normal write rule, the Thomas Write Rule directly skips a resource that was written in the future (and was meant to be aborted). This rule can be understood intuitively by the example on the right side of the figure above.
 
@@ -74,18 +79,19 @@ Next, let's discuss the concept of a recoverable schedule. So, what is a recover
 > **What is recoverable schedule?**
 > A schedule is recoverable if txns commit only after <u>all txns</u> whose changes they read, <u>commit</u>.
 
-![image-20220115170136786]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115170136786.png' | relative_url}})
+![image-20220115170136786]({{'/assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115170136786.png' | relative_url}})
 
 This concept is crucial to maintain the integrity and consistency of data in the event of failures. The ability to recover to a consistent state after a failure is a key aspect of any reliable database system.
 
 
 ## 4. Isolation Level
 
-> ![image-20220115173019814]({{'//assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115173019814.png' | relative_url}})
+> ![image-20220115173019814]({{'/assets/images/2022-1-12-timestamp-ordering-concurrency-control/image-20220115173019814.png' | relative_url}})
 
 The isolation level of a transaction refers to the degree to which the changes made by one transaction are visible to other concurrent transactions. There are four isolation levels defined by the SQL standard, each providing a different balance between performance and the likelihood of concurrency phenomena. The four levels, in increasing order of isolation, are Read Uncommitted, Read Committed, Repeatable Read, and Serializable.
 
 Understanding the trade-offs between the different isolation levels helps in selecting the most appropriate level for a particular transaction or application, considering factors such as the nature of the data, the requirements of the application, and the acceptable level of risk for concurrency phenomena like dirty reads, non-repeatable reads, and phantom reads.
+
 
 
 

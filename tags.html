@@ -1,18 +1,5 @@
 ---
 layout: default
+title: Topics
 ---
-<div class="home other-pages">
-  <h1 class="page-heading">Tags</h1>
-  {% capture temp_tags %}
-    {% for tag in site.tags %}
-      {{ tag[1].size | plus: 1000 }}#{{ tag[0] }}#{{ tag[1].size }}
-    {% endfor %}
-  {% endcapture %}
-  {% assign sorted_temp_tags = temp_tags | split:' ' | sort %}
-  {% for temp_tag in sorted_temp_tags %}
-    {% assign tag_items = temp_tag | split: '#' %}
-    <span class="post-meta">
-      <a class="post-tag" href="/pin-log/tag/{{ tag_items[1] }}">{{ tag_items[1]}} ({{ tag_items[2] }})</a>
-    </span><br/>
-  {% endfor %}
-</div>
+<div class="site-width index-page"><header class="index-intro"><p class="eyebrow">PIN’LOG / <span class="lang-en">TOPICS</span><span class="lang-zh" lang="zh-CN">主题</span></p><h1><span class="lang-en">Follow your curiosity.</span><span class="lang-zh" lang="zh-CN">跟着好奇心，继续翻阅。</span></h1><p><span class="lang-en">A few starting points. There is always room for something new.</span><span class="lang-zh" lang="zh-CN">从这里出发，也为新的主题留出位置。</span></p></header>{% assign sorted_topics = site.tags | sort %}<nav class="topic-index" aria-label="Topics">{% for topic in sorted_topics %}<a href="#{{ topic[0] | slugify }}">{% include topic-label.html tag=topic[0] %}<span class="topic-count">{{ topic[1].size }}</span></a>{% endfor %}</nav>{% for topic in sorted_topics %}{% assign topic_info = site.data.topics[topic[0]] %}<section class="topic-section" id="{{ topic[0] | slugify }}"><div class="section-heading"><h2>{% include topic-label.html tag=topic[0] %}</h2><span class="eyebrow">{{ topic[1].size }} <span class="lang-en">notes</span><span class="lang-zh" lang="zh-CN">篇笔记</span></span></div>{% if topic_info %}<p class="topic-description"><span class="lang-en">{{ topic_info.description_en }}</span><span class="lang-zh" lang="zh-CN">{{ topic_info.description_zh }}</span></p>{% endif %}<div class="notes-grid">{% for post in topic[1] %}{% include note-card.html post=post %}{% endfor %}</div></section>{% endfor %}</div>

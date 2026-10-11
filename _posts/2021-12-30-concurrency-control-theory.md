@@ -3,6 +3,11 @@ layout: post
 title: "Database System: Concurrency Control Theory"
 date: 2021-12-30 02:00:00
 tags: 15-445
+title_zh: 数据库：并发控制理论
+summary: 'Transactions, ACID, serializability, and conflicts: the foundations beneath concurrent database execution.'
+summary_zh: 事务、ACID、可串行化与冲突：理解数据库并发执行的基础。
+visual: theory
+translation_zh: translations/concurrency.md
 ---
 
 
@@ -115,3 +120,4 @@ We usually use the Precedence Graph (Dependency Graph) to determine whether a sc
 Finally then, some of the most important concepts in this section can be summarized by this diagram.
 
 ![image-20211226224957811]({{ '/assets/images/2021-12-30-concurrency-control-theory/image-20211226224957811.png' | relative_url}})
+

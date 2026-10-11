@@ -1,0 +1,10 @@
+<div class="note-cover cover-{{ include.visual | default: 'notebook' }}" aria-hidden="true">
+  {% case include.visual %}
+  {% when 'policy' %}<div class="cover-chain"><span class="cover-circle cover-accent">π</span><span class="cover-connector"></span><span class="cover-page">τ</span><span class="cover-connector"></span><span class="cover-circle">π′</span></div><div class="cover-small">ACT · OBSERVE · LEARN</div>
+  {% when 'logging' %}<div class="cover-books"><span><i></i><i></i><i></i></span><span class="cover-accent"><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span></div><div class="cover-small">LOG → DATA → RECOVER</div>
+  {% when 'locking' %}<div class="cover-locks"><span>T₁</span><span class="cover-bar"></span><span class="cover-accent">X</span><span class="cover-bar"></span><span>T₂</span></div><div class="cover-small">GROWING / SHRINKING</div>
+  {% when 'timestamp' %}<div class="cover-clock"><span>t₁</span><span class="cover-dot"></span><span>t₂</span><span class="cover-dot"></span><span>t₃</span></div><div class="cover-small">A MATTER OF ORDER</div>
+  {% when 'theory' %}<div class="cover-schedule"><span>T₁ <i></i><i class="cover-accent"></i><i></i></span><span>T₂ <i class="cover-accent"></i><i></i><i></i></span></div><div class="cover-small">INTERLEAVE, WITH CARE</div>
+  {% else %}<div class="cover-notebook"><span></span><span></span><span></span><span></span></div><div class="cover-small">NOTES IN THE MAKING</div>
+  {% endcase %}
+</div>

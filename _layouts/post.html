@@ -1,43 +1,13 @@
 ---
 layout: default
 ---
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-  <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">{{ page.title | escape }}</h1>
-    <p class="post-meta">
-
-      <time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
-        {% assign date_format = site.minima.date_format | default: "%b %-d, %Y" %}
-        {{ page.date | date: date_format }}
-      </time>
-
-      <span itemprop="author" itemscope itemtype="http://schema.org/Person">
-        by <span itemprop="name">{{ site.author }}</span>
-      </span>
-
-      <span>
-        {% for tag in page.tags %}
-          {% capture tag_name %}{{ tag }}{% endcapture %}
-          <a class="post-tag" href="/pin-log/tag/{{ tag_name }}"><nobr>{{ tag_name }}</nobr>&nbsp;</a>
-        {% endfor %}
-      </span>
-    </p>
-  </header>
-
-  <div class="post-content" itemprop="articleBody">
-    {{ content }}
-  </div>
-
-
-  <div class="page-navigation">
-    {% if page.previous.url %}
-      <a class="prev" href="{{page.previous.url | relative_url}}">&larr; {{page.previous.title}}</a>
-    {% endif %}
-
-    {% if page.next.url %}
-      <a class="next" href="{{page.next.url | relative_url}}">{{page.next.title}} &rarr;</a>
-    {% endif %}
-  </div>
-
+<article class="post site-width" itemscope itemtype="https://schema.org/BlogPosting">
+  <header class="post-header"><a class="eyebrow breadcrumb" href="{{ '/' | relative_url }}"><span class="lang-en">← Notebook</span><span class="lang-zh" lang="zh-CN">← 返回笔记</span></a><div class="post-meta"><time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">{{ page.date | date: '%b %d, %Y' }}</time><span class="meta-dot">·</span>{% assign post_tag = page.tags | first %}<a href="{{ '/tags.html' | relative_url }}#{{ post_tag | slugify }}">{% include topic-label.html tag=post_tag %}</a></div><h1 itemprop="headline"><span class="lang-en">{{ page.title | escape }}</span><span class="lang-zh" lang="zh-CN">{{ page.title_zh | default: page.title | escape }}</span></h1><p class="post-deck"><span class="lang-en">{{ page.summary | escape }}</span><span class="lang-zh" lang="zh-CN">{{ page.summary_zh | default: page.summary | escape }}</span></p><div class="post-byline"><span class="author-monogram" aria-hidden="true">PQ</span><span itemprop="author">{{ site.author }}</span><span class="reading-time" data-reading-time></span></div></header>
+  <div class="post-layout"><aside class="contents-sidebar"><div class="eyebrow"><span class="lang-en">On this page</span><span class="lang-zh" lang="zh-CN">本文目录</span></div><nav data-contents aria-label="Article contents"></nav></aside><div class="article-column">
+    {% if page.visual == 'policy' %}{% include policy-demo.html %}{% elsif page.visual == 'logging' %}{% include logging-demo.html %}{% endif %}
+    {% if page.takeaway %}<aside class="takeaway"><p class="eyebrow accent-text"><span class="lang-en">The idea to keep</span><span class="lang-zh" lang="zh-CN">值得记住的事</span></p><p><span class="lang-en">{{ page.takeaway | escape }}</span><span class="lang-zh" lang="zh-CN">{{ page.takeaway_zh | default: page.takeaway | escape }}</span></p></aside>{% endif %}
+    <div class="post-content article-prose lang-en" data-article-language="en" itemprop="articleBody">{{ content }}</div>
+    {% if page.translation_zh %}{% capture chinese_content %}{% include {{ page.translation_zh }} %}{% endcapture %}<div class="post-content article-prose lang-zh" data-article-language="zh" lang="zh-CN">{{ chinese_content | markdownify }}</div>{% else %}<div class="lang-zh" lang="zh-CN"><p class="translation-notice">这篇笔记暂以英文撰写。</p><div class="post-content article-prose" data-article-language="zh">{{ content }}</div></div>{% endif %}
+    <nav class="post-navigation" aria-label="More notes">{% if page.previous.url %}<a href="{{ page.previous.url | relative_url }}"><span class="eyebrow"><span class="lang-en">← Earlier note</span><span class="lang-zh" lang="zh-CN">← 前一篇</span></span><span class="lang-en">{{ page.previous.title | escape }}</span><span class="lang-zh" lang="zh-CN">{{ page.previous.title_zh | default: page.previous.title | escape }}</span></a>{% endif %}{% if page.next.url %}<a href="{{ page.next.url | relative_url }}"><span class="eyebrow"><span class="lang-en">Later note →</span><span class="lang-zh" lang="zh-CN">后一篇 →</span></span><span class="lang-en">{{ page.next.title | escape }}</span><span class="lang-zh" lang="zh-CN">{{ page.next.title_zh | default: page.next.title | escape }}</span></a>{% endif %}</nav>
+  </div></div>
 </article>

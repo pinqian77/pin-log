@@ -1,15 +1,4 @@
 ---
 layout: default
 ---
-<div class="post other-pages">
-	<h1>Tag: {{ page.tag }}</h1>
-	<ul>
-	{% for post in site.tags[page.tag] %}
-	  <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a> ({{ post.date | date_to_string }})<br>
-	    {{ post.description }}
-	  </li>
-	{% endfor %}
-	</ul>
-</div>
-
-<hr>
+<div class="site-width index-page"><header class="index-intro"><a class="eyebrow breadcrumb" href="{{ '/tags.html' | relative_url }}"><span class="lang-en">← All topics</span><span class="lang-zh" lang="zh-CN">← 全部主题</span></a><h1>{% include topic-label.html tag=page.tag %}</h1><p class="eyebrow">{{ page.tag | escape }}</p></header><div class="notes-grid">{% for post in site.tags[page.tag] %}{% include note-card.html post=post %}{% endfor %}</div></div>

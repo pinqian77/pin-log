@@ -1,5 +1,6 @@
 """Check the real Jekyll output without network requests or third-party dependencies."""
 from html.parser import HTMLParser
+from collections import Counter
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -34,7 +35,7 @@ for path in ROOT.rglob('*.html'):
     if parser.language != 'en':
         errors.append(f'{path.relative_to(ROOT)}: default language must be English')
     if len(parser.ids) != len(set(parser.ids)):
-        errors.append(f'{path.relative_to(ROOT)}: duplicate IDs')
+        errors.append(f'{path.relative_to(ROOT)}: duplicate IDs {[(key, count) for key, count in Counter(parser.ids).items() if count > 1]}')
     for link in parser.links:
         url = urlsplit(link)
         if url.scheme or url.netloc or not url.path:
